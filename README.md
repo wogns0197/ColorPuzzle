@@ -1,2 +1,4 @@
-# ColorPuzzle
-ColorPuzzle
+RGBDRG
+GRBDBR
+DDBDRB
+GDGDGR
