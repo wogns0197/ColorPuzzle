@@ -5,6 +5,20 @@
 #include "CommonEnum.h"
 #include "CPGameMgr.generated.h"
 
+USTRUCT()
+struct FDragResult
+{
+	GENERATED_BODY()
+	// 아으~~~ 이럴거면 그냥 첨부터 pair, set 쓰지말자~~~
+	FVector2D Delta;
+	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> TargetArr;
+
+	FDragResult() : Delta( 0 )
+	{
+		TargetArr.Empty();
+	}
+};
+
 UCLASS()
 class UCPGameMgr : public UObject
 {
@@ -28,7 +42,8 @@ private:
 	TWeakObjectPtr<class UCPPuzzleItemData> pFirstItemData;
 
 private:
-	TPair<bool, FVector2D> IsValidDrag( TObjectPtr<class UCPPuzzleItemData> InSecondItemData );
+	FDragResult IsValidDrag( TObjectPtr<class UCPPuzzleItemData> InSecondItemData );
+	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> CheckBetweenValid( bool bHorizontal, EPuzzleColor Color, int nAnchor, int nStartPos, int nEndPos );
 
 public:
 	void OnInitFirstPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InFirstItemData );

@@ -35,6 +35,7 @@ public:
 
 	void SetTileItem( TObjectPtr<class UCPPuzzleItem> InTileItem ) { EntryWidgetItem = InTileItem; }
 
+	bool IsTwinkleItemData() { return IsTwinkeClass( Color ); }
 	EPuzzleColor GetColor() { return Color; }
 	const FVector2D& GetPos() { return Pos; }
 	TObjectPtr<class UCPGameMgr> GetGameMgr() { return GameMgr; }

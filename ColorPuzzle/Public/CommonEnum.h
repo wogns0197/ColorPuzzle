@@ -9,12 +9,28 @@ enum class EPuzzleColor : int32
 	R,
 	G,
 	B,
+	Yellow,
+	White,
 	Silver,
 	Gold,
 	Diamond,
 
 	COUNT,
 };
+
+static bool IsTwinkeClass( EPuzzleColor c )
+{
+	switch ( c )
+	{
+	case EPuzzleColor::Silver:
+	case EPuzzleColor::Gold:
+	case EPuzzleColor::Diamond:
+		return true;
+	default:
+		break;
+	}
+	return false;
+}
 
 USTRUCT(BlueprintType)
 struct FPuzzleProbData : public FTableRowBase

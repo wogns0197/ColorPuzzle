@@ -21,9 +21,14 @@ public:
 
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	class UWidgetAnimation* RefreshAnim;
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	class UWidgetAnimation* TwinkleAnim;
 
 	UPROPERTY(EditAnywhere)
 	TMap<EPuzzleColor, FLinearColor> PuzzleColorMap;
+
+private:
+	FTimerHandle ColorChangeTimerHandle;
 
 public:
 	virtual void NativeOnListItemObjectSet( UObject* ListItemObject ) override;
@@ -35,7 +40,7 @@ public:
 
 public:
 	void UpdatePuzzleStyle();
-	void SetPuzzleStyle();
+	void SetPuzzleStyle( bool bDelay = false );
 private:
 	void PlayRefreshAnim();
 
