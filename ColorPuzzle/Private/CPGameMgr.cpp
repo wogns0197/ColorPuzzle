@@ -5,11 +5,15 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/DataTable.h"
 #include "CPMainUI.h"
+#include "CPScoreBoard.h"
 
 void UCPGameMgr::InitializeData( UUserWidget* _pMainUI, int32 nDefaultPuzzleCount, UObject* InPuzzleProbData )
 {
-	if ( _pMainUI )
-		pMainUI = Cast<UCPMainUI>(_pMainUI);
+	if ( _pMainUI ) {
+		pMainUI = Cast<UCPMainUI>( _pMainUI );
+		pMainUI->SetGameMgr( this );
+		pScoreBoard = pMainUI->GetScoreBoardUI();
+	}
 
 	TArray<FPuzzleProbData*> PuzzleProbDataTable;
 	UDataTable* DT_PuzzleProb = Cast<UDataTable>( InPuzzleProbData );
@@ -38,6 +42,7 @@ void UCPGameMgr::InitializeData( UUserWidget* _pMainUI, int32 nDefaultPuzzleCoun
 	}
 
 	pMainUI->SetTileViewData( ItemDataArr );
+	Score = 0;
 }
 
 EPuzzleColor UCPGameMgr::GetColorByProb()
@@ -51,6 +56,12 @@ EPuzzleColor UCPGameMgr::GetColorByProb()
 			_color = el.Value;
 			break;
 		}
+	}
+
+	// for debug
+	if ( bDebugView ) {
+		TArray<EPuzzleColor> DebugColorArr = { EPuzzleColor::Gold, EPuzzleColor::Diamond };
+		_color = DebugColorArr[FMath::RandRange( 0, 1 )];
 	}
 
 	return _color;
@@ -97,6 +108,12 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 
 		for ( const auto& el : DragResult.TargetArr ) {
 			UpdateDataAndWidget( el.Get() );
+		}
+
+		if ( pScoreBoard )
+		{
+			Score += DragResult.TargetArr.Num();
+			pScoreBoard->SetScore( Score );
 		}
 	}
 	else {
@@ -213,12 +230,15 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::CheckBetweenValid( b
 	return arr;
 }
 
-FDragResult UCPGameMgr::UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill Skill /*= EPuzzleSkill::Default*/ )
+FDragResult UCPGameMgr::UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill /*= EPuzzleSkill::Default*/ )
 {
 	FDragResult Res;
 	const FVector2D& TargetPos = SkillItemdata->GetPos();
 
-	switch ( SkillItemdata->GetItemSkill() )
+	EPuzzleSkill SkillType = SkillItemdata->GetItemSkill();
+	if ( InSkill != EPuzzleSkill::Default ) SkillType = InSkill;
+
+	switch ( SkillType )
 	{
 	case EPuzzleSkill::Horizon:
 	{
@@ -237,17 +257,24 @@ FDragResult UCPGameMgr::UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemd
 		}
 		break;
 	}
-	case EPuzzleSkill::HVRandom:
-		break;
 	case EPuzzleSkill::AllSide:
 	{
-		/*Res.TargetArr = UseSkill(SkillItemdata)*/
+		Res = UseSkill( SkillItemdata, EPuzzleSkill::Vertical );
+		Res.TargetArr.Remove( SkillItemdata );
+		Res.TargetArr.Append( UseSkill( SkillItemdata, EPuzzleSkill::Horizon ).TargetArr );
 		break;
 	}
 	case EPuzzleSkill::RoundRange:
+	{
+		for ( int i = FMath::Max( 0, TargetPos.X - 1 ); i < FMath::Min( 4, TargetPos.X + 1 ) + 1; ++i )
+		{
+			for ( int j = FMath::Max( 0, TargetPos.Y - 1 ); j < FMath::Min( 4, TargetPos.Y + 1 ) + 1; ++j )
+			{
+				Res.TargetArr.AddUnique( ItemDataArr[(i * 5) + j] );
+			}
+		}
 		break;
-	case EPuzzleSkill::COUNT:
-		break;
+	}
 	default:
 		break;
 	}

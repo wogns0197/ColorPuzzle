@@ -64,7 +64,7 @@ void UCPPuzzleItem::SetPuzzleStyle()
 {
 	auto world = GetWorld();
 	GetWorld()->GetTimerManager().SetTimer( ColorChangeTimerHandle, FTimerDelegate::CreateLambda( [=]()
-	{ SetStyle_Internal(); } ), 1, false, 0.3f  );
+	{ SetStyle_Internal(); } ), 1, false, ColorChangeDelay  );
 }
 
 void UCPPuzzleItem::SetStyle_Internal()

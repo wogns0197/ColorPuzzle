@@ -28,13 +28,16 @@ private:
 	UPROPERTY()
 	TObjectPtr<class UCPMainUI> pMainUI;
 	UPROPERTY()
+	TObjectPtr<class UCPScoreBoard> pScoreBoard;
+	UPROPERTY()
 	TArray<TObjectPtr<class UCPPuzzleItemData>> ItemDataArr;
 
 private:
 	TMap<float, EPuzzleColor> Weights;
-	bool bDebugView = false; // for debug
+	int32 Score;
 
 public:
+	bool bDebugView = false; // for debug
 	void InitializeData( UUserWidget* _pMainUI, int32 nDefaultPuzzleCount, UObject* InPuzzleProbData );
 
 // UI 컨트롤
@@ -44,7 +47,7 @@ private:
 
 private:
 	FDragResult IsValidDrag( TObjectPtr<class UCPPuzzleItemData> InSecondItemData );
-	FDragResult UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill Skill = EPuzzleSkill::Default );
+	FDragResult UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill = EPuzzleSkill::Default );
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> CheckBetweenValid( bool bHorizontal, EPuzzleColor Color, int nAnchor, int nStartPos, int nEndPos );
 
 public:

@@ -3,6 +3,8 @@
 #include "CPPuzzleItemData.h"
 #include "CPPuzzleItem.h"
 #include "Components/Button.h"
+#include "CPGameMgr.h"
+#include "CPScoreBoard.h"
 
 bool UCPMainUI::Initialize()
 {
@@ -35,6 +37,10 @@ void UCPMainUI::Refresh()
 void UCPMainUI::OnClickedDebug()
 {
 	bToggleDebug = !bToggleDebug;
+	
+	if ( GameMgr )
+		GameMgr->bDebugView = bToggleDebug;
+
 	if ( TileView )
 	{
 		for ( const auto& el : TileView->GetListItems() )

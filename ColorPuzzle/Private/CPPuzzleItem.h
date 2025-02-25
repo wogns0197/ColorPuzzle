@@ -23,6 +23,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TMap<EPuzzleSkill, FSlateBrush> SkillBrushMap;
+	UPROPERTY(EditAnywhere)
+	float ColorChangeDelay;
+
 
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	class UWidgetAnimation* RefreshAnim;
