@@ -11,7 +11,7 @@ void UCPPuzzleItem::NativeOnListItemObjectSet( UObject* ListItemObject )
 {
 	if ( ItemData = Cast<UCPPuzzleItemData>( ListItemObject ) )
 	{
-		SetPuzzleStyle();
+		SetStyle_Internal();
 		ItemData->SetTileItem( this );
 		ColorChangeTimerHandle.Invalidate();
 	}
@@ -56,38 +56,59 @@ void UCPPuzzleItem::NativeOnMouseEnter( const FGeometry& InGeometry, const FPoin
 
 void UCPPuzzleItem::UpdatePuzzleStyle()
 {
-	SetPuzzleStyle( true );
+	SetPuzzleStyle();
 	PlayRefreshAnim();
 }
 
-void UCPPuzzleItem::SetPuzzleStyle( bool bDelay  )
+void UCPPuzzleItem::SetPuzzleStyle()
 {
 	auto world = GetWorld();
 	GetWorld()->GetTimerManager().SetTimer( ColorChangeTimerHandle, FTimerDelegate::CreateLambda( [=]()
+	{ SetStyle_Internal(); } ), 1, false, 0.3f  );
+}
+
+void UCPPuzzleItem::SetStyle_Internal()
+{
+	if ( !ItemData ) return;
+
+	const EPuzzleColor ColorType = ItemData->GetColor();
+	const EPuzzleSkill SkillType = ItemData->GetItemSkill();
+
+	if ( Image_Background )
 	{
-		// 이거 걍 함수 따로 빼서 바인딩으로 바꾸자
-		if ( Image_Background )
-		{
-			const EPuzzleColor ColorType = ItemData->GetColor();
-			FLinearColor SettingColor = PuzzleColorMap[ColorType];
-			Image_Background->SetColorAndOpacity( SettingColor );
+		FLinearColor SettingColor = PuzzleColorMap[ColorType];
+		Image_Background->SetColorAndOpacity( SettingColor );
 
-			SettingColor.A = 0.3f;
-			Image_Border->SetColorAndOpacity( SettingColor );
+		SettingColor.A = 0.3f;
+		Image_Border->SetColorAndOpacity( SettingColor );
 
-			StopAnimation( TwinkleAnim );
-			if ( IsTwinkeClass( ColorType ) ) {
-				PlayAnimation( TwinkleAnim, 0.f, 0 );
-			}
+		StopAnimation( TwinkleAnim );
+		if ( IsTwinkeClass( ColorType ) ) {
+			PlayAnimation( TwinkleAnim, 0.f, 0 );
 		}
+	}
 
-		// for debug
-		if ( TextBlock_SomeThing )
-			TextBlock_SomeThing->SetText( FText::FromString( FString::Printf( TEXT("%d,%d"), 
-				FMath::RoundToInt(ItemData->GetPos().X), FMath::RoundToInt(ItemData->GetPos().Y) ) ) );
+	if ( Image_SkillIcon )
+	{
+		if ( SkillType != EPuzzleSkill::Default )
+		{
+			const FSlateBrush& SkillBrush = SkillBrushMap[SkillType];
+			Image_SkillIcon->SetBrush( SkillBrush );
+		}
+		Image_SkillIcon->SetVisibility( SkillType == EPuzzleSkill::Default ? ESlateVisibility::Collapsed : ESlateVisibility::SelfHitTestInvisible );
+	}
+}
 
+void UCPPuzzleItem::ShowDebugInfo( bool v )
+{
+	// for debug
+	if ( TextBlock_SomeThing )
+	{
+		TextBlock_SomeThing->SetText( FText::FromString( FString::Printf( TEXT( "%d,%d" ),
+			FMath::RoundToInt( ItemData->GetPos().X ), FMath::RoundToInt( ItemData->GetPos().Y ) ) ) );
 
-	} ), 1, false, bDelay ? 0.3f : 0.f );
+		TextBlock_SomeThing->SetVisibility( v ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed );
+	}
 }
 
 void UCPPuzzleItem::PlayRefreshAnim()

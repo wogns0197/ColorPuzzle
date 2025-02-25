@@ -2,6 +2,14 @@
 #include "CPPuzzleItem.h"
 #include "CPGameMgr.h"
 
+void UCPPuzzleItemData::SetData( EPuzzleColor InColor,  EPuzzleSkill InSkill, TObjectPtr<UCPGameMgr> InGameMgr, const FVector2D& InPos )
+{
+	Color = InColor;
+	GameMgr = InGameMgr;
+	Pos = InPos;
+	ItemSkill = InSkill;
+}
+
 void UCPPuzzleItemData::InitFirstPuzzle()
 {
 	if ( GameMgr )
@@ -20,4 +28,8 @@ void UCPPuzzleItemData::UpdateAnimToItemWidget()
 		EntryWidgetItem->UpdatePuzzleStyle();
 }
 
-
+void UCPPuzzleItemData::OnToggleDebug( bool v )
+{
+	if ( EntryWidgetItem )
+		EntryWidgetItem->ShowDebugInfo( v );
+}

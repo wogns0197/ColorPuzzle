@@ -30,8 +30,9 @@ void UCPGameMgr::InitializeData( UUserWidget* _pMainUI, int32 nDefaultPuzzleCoun
 		for ( int j = 0; j < nDefaultPuzzleCount; ++j )
 		{
 			UCPPuzzleItemData* pData = NewObject<UCPPuzzleItemData>();
-			EPuzzleColor SettingColor = GetColorByProb();
-			pData->SetData( SettingColor, this, FVector2D( i, j ) );
+			const EPuzzleColor SettingColor = GetColorByProb();
+			const EPuzzleSkill SettingSkill = GetSkillByProb( SettingColor );
+			pData->SetData( SettingColor, SettingSkill, this, FVector2D( i, j ) );
 			ItemDataArr.Emplace( pData );
 		}
 	}
@@ -53,6 +54,16 @@ EPuzzleColor UCPGameMgr::GetColorByProb()
 	}
 
 	return _color;
+}
+
+EPuzzleSkill UCPGameMgr::GetSkillByProb( EPuzzleColor InColor )
+{
+	EPuzzleSkill _skill = GetSkillByColor( InColor );
+
+	if ( _skill != EPuzzleSkill::HVRandom ) return _skill;
+
+	TArray<EPuzzleSkill> tempArr{ EPuzzleSkill::Horizon, EPuzzleSkill::Vertical };
+	return tempArr[FMath::RandRange( 0, tempArr.Num() - 1 )];
 }
 
 void UCPGameMgr::OnInitFirstPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InFirstItemData )
@@ -78,7 +89,9 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 		UE_LOG( LogTemp, Warning, TEXT( "O : Delta(%f,%f)"), DragResult.Delta.X, DragResult.Delta.Y );
 		
 		auto UpdateDataAndWidget = [=]( UCPPuzzleItemData* TargetItemData ) {
-			TargetItemData->SetData( GetColorByProb() );
+			const EPuzzleColor SettingColor = GetColorByProb();
+			const EPuzzleSkill SettingSkill = GetSkillByProb( SettingColor );
+			TargetItemData->SetData( SettingColor, SettingSkill );
 			TargetItemData->UpdateAnimToItemWidget();
 		};
 
@@ -105,9 +118,20 @@ FDragResult UCPGameMgr::IsValidDrag( TObjectPtr<UCPPuzzleItemData> InSecondItem 
 	{
 		const FVector2D& FirstPos = pFirstItemData->GetPos();
 		const FVector2D& SecondPos = InSecondItem->GetPos();
-		if ( FirstPos == SecondPos || // 둘다 색이 다르고 둘다 반짝이클래스가 아닐 경우
-			(pFirstItemData->GetColor() != InSecondItem->GetColor() && (!pFirstItemData->IsTwinkleItemData() && !InSecondItem->IsTwinkleItemData())) )
-		{ return Res; }
+
+		if ( FirstPos == SecondPos )
+		{
+			if ( IsTwinkeClass( pFirstItemData->GetColor() ) )
+			{
+				return UseSkill( pFirstItemData.Get() );
+			}
+		}
+
+		// 둘다 색이 다르고 둘다 반짝이클래스가 아닐 경우
+		else if ( pFirstItemData->GetColor() != InSecondItem->GetColor() && (!pFirstItemData->IsTwinkleItemData() && !InSecondItem->IsTwinkleItemData()) )
+		{ 
+			return Res; 
+		}
 
 		int32 x1 = FirstPos.X;
 		int32 y1 = FirstPos.Y;
@@ -187,4 +211,46 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::CheckBetweenValid( b
 	}
 
 	return arr;
+}
+
+FDragResult UCPGameMgr::UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill Skill /*= EPuzzleSkill::Default*/ )
+{
+	FDragResult Res;
+	const FVector2D& TargetPos = SkillItemdata->GetPos();
+
+	switch ( SkillItemdata->GetItemSkill() )
+	{
+	case EPuzzleSkill::Horizon:
+	{
+		for ( int i = TargetPos.X * 5; i < (TargetPos.X * 5) + 5; ++i )
+		{
+			Res.TargetArr.AddUnique( ItemDataArr[i] );
+		}
+
+		break;
+	}
+	case EPuzzleSkill::Vertical:
+	{
+		for ( int i = TargetPos.Y; i < TargetPos.Y + 20 + 1; i += 5 )
+		{
+			Res.TargetArr.AddUnique( ItemDataArr[i] );
+		}
+		break;
+	}
+	case EPuzzleSkill::HVRandom:
+		break;
+	case EPuzzleSkill::AllSide:
+	{
+		/*Res.TargetArr = UseSkill(SkillItemdata)*/
+		break;
+	}
+	case EPuzzleSkill::RoundRange:
+		break;
+	case EPuzzleSkill::COUNT:
+		break;
+	default:
+		break;
+	}
+
+	return Res;
 }

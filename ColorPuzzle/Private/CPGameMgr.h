@@ -32,6 +32,7 @@ private:
 
 private:
 	TMap<float, EPuzzleColor> Weights;
+	bool bDebugView = false; // for debug
 
 public:
 	void InitializeData( UUserWidget* _pMainUI, int32 nDefaultPuzzleCount, UObject* InPuzzleProbData );
@@ -43,6 +44,7 @@ private:
 
 private:
 	FDragResult IsValidDrag( TObjectPtr<class UCPPuzzleItemData> InSecondItemData );
+	FDragResult UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill Skill = EPuzzleSkill::Default );
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> CheckBetweenValid( bool bHorizontal, EPuzzleColor Color, int nAnchor, int nStartPos, int nEndPos );
 
 public:
@@ -52,4 +54,5 @@ public:
 
 private:
 	EPuzzleColor GetColorByProb();
+	EPuzzleSkill GetSkillByProb( EPuzzleColor InColor );
 };

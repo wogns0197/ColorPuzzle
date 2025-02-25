@@ -12,6 +12,7 @@ class UCPPuzzleItemData : public UObject
 	
 private:
 	EPuzzleColor Color;
+	EPuzzleSkill ItemSkill;
 	FVector2D Pos;
 
 	UPROPERTY()
@@ -19,18 +20,13 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<class UCPPuzzleItem> EntryWidgetItem;
-
+	
 public:
-	void SetData( EPuzzleColor InColor, TObjectPtr<class UCPGameMgr> InGameMgr
-		, const FVector2D& InPos )
+	void SetData( EPuzzleColor InColor, EPuzzleSkill InSkill, TObjectPtr<class UCPGameMgr> InGameMgr, const FVector2D& InPos );
+	void SetData( EPuzzleColor InColor, EPuzzleSkill InSkill )
 	{
 		Color = InColor;
-		GameMgr = InGameMgr;
-		Pos = InPos;
-	}
-	void SetData( EPuzzleColor InColor )
-	{
-		Color = InColor;
+		ItemSkill = InSkill;
 	}
 
 	void SetTileItem( TObjectPtr<class UCPPuzzleItem> InTileItem ) { EntryWidgetItem = InTileItem; }
@@ -39,8 +35,11 @@ public:
 	EPuzzleColor GetColor() { return Color; }
 	const FVector2D& GetPos() { return Pos; }
 	TObjectPtr<class UCPGameMgr> GetGameMgr() { return GameMgr; }
+	EPuzzleSkill GetItemSkill() { return ItemSkill; }
 
 	void InitFirstPuzzle();
 	void EndSecondPuzzle();
 	void UpdateAnimToItemWidget();
+
+	void OnToggleDebug( bool v ); // for debug
 };

@@ -18,6 +18,24 @@ enum class EPuzzleColor : int32
 	COUNT,
 };
 
+UENUM()
+enum class EPuzzleSkill : int32
+{
+	Default,
+
+	/*Left,
+	Right,*/ // 리소스는 있으나 나중에 확장하자
+
+	Horizon,
+	Vertical,
+	HVRandom,
+
+	AllSide,
+	RoundRange,
+
+	COUNT,
+};
+
 static bool IsTwinkeClass( EPuzzleColor c )
 {
 	switch ( c )
@@ -30,6 +48,29 @@ static bool IsTwinkeClass( EPuzzleColor c )
 		break;
 	}
 	return false;
+}
+
+static EPuzzleSkill GetSkillByColor( EPuzzleColor c )
+{
+	switch ( c )
+	{
+	case EPuzzleColor::R:
+	case EPuzzleColor::G:
+	case EPuzzleColor::B:
+	case EPuzzleColor::Yellow:
+	case EPuzzleColor::White:
+	{
+		return EPuzzleSkill::Default;
+	}
+	case EPuzzleColor::Silver:
+		return EPuzzleSkill::HVRandom;
+	case EPuzzleColor::Gold:
+		return EPuzzleSkill::RoundRange;
+	case EPuzzleColor::Diamond:
+		return EPuzzleSkill::AllSide;
+	default:
+		return EPuzzleSkill::Default;
+	}
 }
 
 USTRUCT(BlueprintType)

@@ -17,7 +17,12 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UImage* Image_Border;
 	UPROPERTY(meta=(BindWidget))
+	class UImage* Image_SkillIcon;
+	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* TextBlock_SomeThing;
+
+	UPROPERTY(EditAnywhere)
+	TMap<EPuzzleSkill, FSlateBrush> SkillBrushMap;
 
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	class UWidgetAnimation* RefreshAnim;
@@ -40,9 +45,12 @@ public:
 
 public:
 	void UpdatePuzzleStyle();
-	void SetPuzzleStyle( bool bDelay = false );
+	void SetPuzzleStyle();
+	void ShowDebugInfo(bool v);
+
 private:
 	void PlayRefreshAnim();
+	void SetStyle_Internal();
 
 public:
 	UPROPERTY()
