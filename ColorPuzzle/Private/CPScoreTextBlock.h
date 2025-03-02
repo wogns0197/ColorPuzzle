@@ -9,26 +9,23 @@ class UCPScoreTextBlock : public UUserWidget
 {
 	GENERATED_BODY()
 
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY( meta = (BindWidget) )
 	class UTextBlock* TextBlock_Digit;
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY( meta = (BindWidget) )
 	class UTextBlock* TextBlock_Effect;
 
-	UPROPERTY(meta=(BindWidgetAnim), Transient)
-	class UWidgetAnimation* AccumulateAnim;
-	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	UPROPERTY( meta = (BindWidgetAnim), Transient )
 	class UWidgetAnimation* NewDigitAnim;
 
 private:
 	int32 CurDigit;
 	bool bNewDigit;
+	bool bIndexUp; // 자리수 증가 체크
 
 public:
+	virtual void NativeConstruct() override;
 	virtual bool Initialize() override;
 	void SetDigit( int32 Num );
+	void ToggleIndexUp() { bIndexUp = true; }
 
-public:
-	FWidgetAnimationDynamicEvent AnimFinishDelegate;
-	UFUNCTION()
-	void OnFinishedAccumulateAnim();
 };

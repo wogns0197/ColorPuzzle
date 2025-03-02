@@ -30,6 +30,11 @@ void UCPScoreBoard::SetScore( int32 Num )
 
 	if ( Digits.Num() > TextArr.Num() ) // 세팅하려는 수의 자리수가 더 크거다면 위젯추가
 	{
+		for ( const auto& el : TextArr )
+		{
+			el->ToggleIndexUp();
+		}
+
 		for ( int i = 0; i < Digits.Num() - TextArr.Num(); ++i )
 		{
 			UCPScoreTextBlock* NewScoreDigitTextBlock = CreateWidget<UCPScoreTextBlock>( GetWorld(), ScoreTextBlockObj );
@@ -38,8 +43,13 @@ void UCPScoreBoard::SetScore( int32 Num )
 		}
 	}
 
-	for ( int i = TextArr.Num(); i > 0; i-- )
+	/*for ( int i = TextArr.Num(); i > 0; i-- )
 	{
 		TextArr[i - 1]->SetDigit( Digits[i - 1] );
+	}*/
+
+	for ( int i = 0; i < TextArr.Num(); i++ )
+	{
+		TextArr[i]->SetDigit( Digits[TextArr.Num() - i - 1] );
 	}
 }

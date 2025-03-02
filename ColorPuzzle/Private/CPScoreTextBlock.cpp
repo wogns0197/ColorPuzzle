@@ -2,38 +2,41 @@
 #include "Components/TextBlock.h"
 #include "Animation/WidgetAnimation.h"
 
+
+void UCPScoreTextBlock::NativeConstruct()
+{
+	Super::NativeConstruct();
+}
+
 bool UCPScoreTextBlock::Initialize()
 {
 	bool bRet = Super::Initialize();
 
-	if ( AccumulateAnim )
-	{
-		if ( !AnimFinishDelegate.IsBound() )
-			AnimFinishDelegate.BindDynamic( this, &UCPScoreTextBlock::OnFinishedAccumulateAnim );
-
-		BindToAnimationFinished( AccumulateAnim, AnimFinishDelegate );
-	}
-
 	bNewDigit = true;
+	bIndexUp = false;
 	return bRet;
 }
 
 void UCPScoreTextBlock::SetDigit( int32 Num )
 {
-	CurDigit = FMath::Min( 9, FMath::Max( 0, Num ) );
+	bool bSame = false;
+	Num = FMath::Min( 9, FMath::Max( 0, Num ) );
+	if ( CurDigit == Num )
+		bSame = true;
+
+	CurDigit = Num;
 
 	if ( TextBlock_Digit )
 		TextBlock_Digit->SetText( FText::AsNumber( CurDigit ) );
 
-	if ( bNewDigit )
+	if ( bNewDigit || bIndexUp || !bSame )
 	{
 		PlayAnimation( NewDigitAnim );
 		bNewDigit = false;
 	}
-	else
-	{
-		PlayAnimation( AccumulateAnim );
-	}
+
+	if ( bIndexUp )
+		bIndexUp = false;
 }
 
 //void UCPScoreTextBlock::AccumulateDigit( int32 Num /*= 1*/ )
@@ -46,9 +49,3 @@ void UCPScoreTextBlock::SetDigit( int32 Num )
 //	if ( AccumulateAnim )
 //		PlayAnimation( AccumulateAnim );
 //}
-
-void UCPScoreTextBlock::OnFinishedAccumulateAnim()
-{
-	if ( TextBlock_Effect )
-		TextBlock_Effect->SetText( FText::AsNumber( CurDigit ) );
-}
