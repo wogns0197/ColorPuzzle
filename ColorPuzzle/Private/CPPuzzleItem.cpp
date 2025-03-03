@@ -1,11 +1,26 @@
 #include "CPPuzzleItem.h"
 #include "CPPuzzleItemData.h"
 #include "CPGameMgr.h"
+#include "CPMainUI.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Animation/WidgetAnimation.h"
 
 #pragma region _NATIVE_OVERIDE
 // ====================================== FOR NATIVE FUNC 
+
+void UCPPuzzleItem::NativeTick( const FGeometry& MyGeometry, float InDeltaTime )
+{
+	Super::NativeTick( MyGeometry, InDeltaTime );
+
+	if ( bMove )
+	{
+		bMove = false;
+
+		FVector2D CurPos = RenderTransform.Translation;
+		int a = 0;
+	}
+}
 
 void UCPPuzzleItem::NativeOnListItemObjectSet( UObject* ListItemObject )
 {
@@ -15,6 +30,11 @@ void UCPPuzzleItem::NativeOnListItemObjectSet( UObject* ListItemObject )
 		ItemData->SetTileItem( this );
 		ColorChangeTimerHandle.Invalidate();
 	}
+
+	MoveAnimEndDelegate.BindDynamic( this, &UCPPuzzleItem::OnFinishedMoveAnim );
+	BindToAnimationFinished( MoveAnim, MoveAnimEndDelegate );
+
+	bMove = false;
 }
 
 FReply UCPPuzzleItem::NativeOnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent )
@@ -99,6 +119,20 @@ void UCPPuzzleItem::SetStyle_Internal()
 	}
 }
 
+void UCPPuzzleItem::OnFinishedMoveAnim()
+{
+	RenderTransform.Translation = FVector2D( 0, 0 );
+	SetRenderTransform( RenderTransform );
+	InvalidateLayoutAndVolatility();
+	SetStyle_Internal();
+
+	if ( ItemData )
+	{
+		auto pMainUI = ItemData->GetGameMgr()->GetMainUI();
+		pMainUI->CallMoveAnimFinished( ItemData->GetPos().Y );
+	}
+}
+
 void UCPPuzzleItem::ShowDebugInfo( bool v )
 {
 	// for debug
@@ -109,6 +143,12 @@ void UCPPuzzleItem::ShowDebugInfo( bool v )
 
 		TextBlock_SomeThing->SetVisibility( v ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed );
 	}
+}
+
+void UCPPuzzleItem::PlayMoveAnim()
+{
+	if ( MoveAnim )
+		PlayAnimation( MoveAnim );
 }
 
 void UCPPuzzleItem::PlayRefreshAnim()

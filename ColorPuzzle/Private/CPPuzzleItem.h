@@ -31,14 +31,18 @@ public:
 	class UWidgetAnimation* RefreshAnim;
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	class UWidgetAnimation* TwinkleAnim;
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	class UWidgetAnimation* MoveAnim;
 
 	UPROPERTY(EditAnywhere)
 	TMap<EPuzzleColor, FLinearColor> PuzzleColorMap;
 
 private:
 	FTimerHandle ColorChangeTimerHandle;
+	bool bMove;
 
 public:
+	virtual void NativeTick( const FGeometry& MyGeometry, float InDeltaTime ) override;
 	virtual void NativeOnListItemObjectSet( UObject* ListItemObject ) override;
 	virtual void NativeOnMouseLeave( const FPointerEvent& InMouseEvent ) override;
 	virtual FReply NativeOnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent ) override;
@@ -50,6 +54,7 @@ public:
 	void UpdatePuzzleStyle();
 	void SetPuzzleStyle();
 	void ShowDebugInfo(bool v);
+	void PlayMoveAnim();
 
 private:
 	void PlayRefreshAnim();
@@ -58,4 +63,9 @@ private:
 public:
 	UPROPERTY()
 	TObjectPtr<class UCPPuzzleItemData> ItemData; // safe..??
+
+private:
+	FWidgetAnimationDynamicEvent MoveAnimEndDelegate;
+	UFUNCTION()
+	void OnFinishedMoveAnim();
 };

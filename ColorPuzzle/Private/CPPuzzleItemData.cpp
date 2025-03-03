@@ -10,6 +10,35 @@ void UCPPuzzleItemData::SetData( EPuzzleColor InColor,  EPuzzleSkill InSkill, TO
 	ItemSkill = InSkill;
 }
 
+void UCPPuzzleItemData::SetDataDirty(  FPuzzleData InData, bool bExcepPos /*= true*/ )
+{
+	if ( bExcepPos )
+	{
+		DirtyData.Color = InData.Color;
+		DirtyData.ItemSkill = InData.ItemSkill;
+		DirtyData.Pos = this->Pos; // 명시적으로라도 적어둔단
+	}
+	else
+		DirtyData = InData;
+}
+
+void UCPPuzzleItemData::FlushData()
+{
+	Color = DirtyData.Color;
+	ItemSkill = DirtyData.ItemSkill;
+	Pos = DirtyData.Pos;
+}
+
+FPuzzleData UCPPuzzleItemData::GetData()
+{
+	FPuzzleData fRet;
+	fRet.Color = Color;
+	fRet.ItemSkill = ItemSkill;
+	fRet.Pos = Pos;
+
+	return fRet;
+}
+
 void UCPPuzzleItemData::InitFirstPuzzle()
 {
 	if ( GameMgr )
@@ -32,4 +61,10 @@ void UCPPuzzleItemData::OnToggleDebug( bool v )
 {
 	if ( EntryWidgetItem )
 		EntryWidgetItem->ShowDebugInfo( v );
+}
+
+void UCPPuzzleItemData::OnProcessMove()
+{
+	if ( EntryWidgetItem )
+		EntryWidgetItem->PlayMoveAnim();
 }

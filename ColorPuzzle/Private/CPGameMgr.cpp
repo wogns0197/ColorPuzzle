@@ -123,6 +123,21 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 	pFirstItemData.Reset();
 }
 
+void UCPGameMgr::MovePuzzle( int32 nIndex, bool bDown )
+{
+	FPuzzleData PreData = ItemDataArr[nIndex + 20]->GetData();
+	for ( int i = nIndex; i < 25; i += 5 )
+	{
+		if ( UCPPuzzleItemData* pItemdata = ItemDataArr[i] )
+		{
+			pItemdata->SetDataDirty( PreData );
+			pItemdata->OnProcessMove();
+			PreData = pItemdata->GetData();
+			pItemdata->FlushData();
+		}
+	}
+}
+
 // ================================================================================================================================
 // ================================================================================================================================
 // ================================================================================================================================

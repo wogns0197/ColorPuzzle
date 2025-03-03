@@ -39,6 +39,7 @@ private:
 public:
 	bool bDebugView = false; // for debug
 	void InitializeData( UUserWidget* _pMainUI, int32 nDefaultPuzzleCount, UObject* InPuzzleProbData );
+	UCPMainUI* GetMainUI() { return pMainUI; }
 
 // UI 컨트롤
 private:
@@ -53,7 +54,7 @@ private:
 public:
 	void OnInitFirstPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InFirstItemData );
 	void OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSecondItemData );
-
+	void MovePuzzle( int32 nIndex, bool bDown = true );
 
 private:
 	EPuzzleColor GetColorByProb();

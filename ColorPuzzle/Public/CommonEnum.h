@@ -3,6 +3,15 @@
 #include "Engine/DataTable.h"
 #include "CommonEnum.generated.h"
 
+USTRUCT()
+struct FPuzzleData
+{
+	GENERATED_BODY()
+	EPuzzleColor Color;
+	EPuzzleSkill ItemSkill;
+	FVector2D Pos;
+};
+
 UENUM()
 enum class EPuzzleColor : int32
 {

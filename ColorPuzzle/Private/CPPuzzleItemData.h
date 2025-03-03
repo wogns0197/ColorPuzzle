@@ -14,6 +14,7 @@ private:
 	EPuzzleColor Color;
 	EPuzzleSkill ItemSkill;
 	FVector2D Pos;
+	FPuzzleData DirtyData;
 
 	UPROPERTY()
 	TObjectPtr<class UCPGameMgr> GameMgr;
@@ -28,6 +29,10 @@ public:
 		Color = InColor;
 		ItemSkill = InSkill;
 	}
+	void SetDataDirty( FPuzzleData InData, bool bExcepPos = true ); // 움직이고나서 flush 해줘야 할 데이터들
+	void FlushData();
+
+	FPuzzleData GetData();
 
 	void SetTileItem( TObjectPtr<class UCPPuzzleItem> InTileItem ) { EntryWidgetItem = InTileItem; }
 
@@ -42,4 +47,5 @@ public:
 	void UpdateAnimToItemWidget();
 
 	void OnToggleDebug( bool v ); // for debug
+	void OnProcessMove();
 };
