@@ -95,7 +95,7 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 
 	const auto& DragResult = IsValidDrag( InSecondItemData.Get() );
 	
-	if ( DragResult.TargetArr.Num() > 0 )
+	if ( DragResult.bValid && DragResult.TargetArr.Num() > 0 )
 	{
 		UE_LOG( LogTemp, Warning, TEXT( "O : Delta(%f,%f)"), DragResult.Delta.X, DragResult.Delta.Y );
 		
@@ -116,8 +116,14 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 			pScoreBoard->SetScore( Score );
 		}
 	}
-	else {
-		UE_LOG( LogTemp, Warning, TEXT( "X" ) );
+
+	if ( !DragResult.bValid )
+	{
+		const auto& DeltaPuzzles = GetDeltaPuzzles( DragResult.Delta.Y > 0 ? true : false, pFirstItemData->GetPos() );
+		for ( const auto& el : DeltaPuzzles )
+		{
+			el->OnDragFailed();
+		}
 	}
 
 	pFirstItemData.Reset();
@@ -145,7 +151,7 @@ void UCPGameMgr::MovePuzzle( int32 nIndex, bool bDown )
 FDragResult UCPGameMgr::IsValidDrag( TObjectPtr<UCPPuzzleItemData> InSecondItem )
 {
 	FDragResult Res;
-
+	Res.bValid = false;
 	if ( pFirstItemData.IsValid() && InSecondItem )
 	{
 		const FVector2D& FirstPos = pFirstItemData->GetPos();
@@ -179,21 +185,23 @@ FDragResult UCPGameMgr::IsValidDrag( TObjectPtr<UCPPuzzleItemData> InSecondItem 
 		}
 		else if ( (x2 - x1) == 0 && (y2 - y1) != 0 ) // 가로드래그
 		{
-			DragDelta = y2 - y1;
-			if ( FMath::Abs( DragDelta ) < 5 ) // 첫 지점에서 최대 4칸 멀리까지 선택가능
+			DragDelta = FMath::Abs( y2 - y1 );
+			if ( DragDelta < 5 ) // 첫 지점에서 최대 4칸 멀리까지 선택가능
 			{
 				// 요새는 Return Value 최적화로 복사없이 해준다네...
 				Res.TargetArr = CheckBetweenValid( true, pFirstItemData->GetColor(), x1, FMath::Min( y1, y2 ), FMath::Max( y1, y2 ) );
+				if ( Res.TargetArr.Num() > 0 ) Res.bValid = true;
 				Res.Delta.Y = DragDelta;
 			}
 		}
 
 		else if ( (x2 - x1) != 0 && (y2 - y1) == 0 ) // 세로드래그
 		{
-			DragDelta = x2 - x1;
-			if ( FMath::Abs( DragDelta ) < 5 )
+			DragDelta = FMath::Abs( x2 - x1 );
+			if ( DragDelta < 5 )
 			{
 				Res.TargetArr = CheckBetweenValid( false, pFirstItemData->GetColor(), y1, FMath::Min( x1, x2 ), FMath::Max( x1, x2 ) );
+				if ( Res.TargetArr.Num() > 0 ) Res.bValid = true;
 				Res.Delta.X = DragDelta;
 			}
 		}
@@ -245,9 +253,35 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::CheckBetweenValid( b
 	return arr;
 }
 
+TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::GetDeltaPuzzles( bool bHorizontal, const FVector2D& startPos )
+{
+	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> Res;
+
+	int32 startPivot = 0;
+	if ( bHorizontal )
+	{
+		startPivot = startPos.X * 5;
+		for ( int i = startPivot; i < startPivot + 5; i++ )
+		{
+			Res.AddUnique( ItemDataArr[i] );
+		}
+	}
+	else
+	{
+		startPivot = startPos.Y;
+		for ( int i = startPivot; i < startPivot + 20 + 1; i += 5 )
+		{
+			Res.AddUnique( ItemDataArr[i] );
+		}
+	}
+
+	return Res;
+}
+
 FDragResult UCPGameMgr::UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill /*= EPuzzleSkill::Default*/ )
 {
 	FDragResult Res;
+	Res.bValid = true;
 	const FVector2D& TargetPos = SkillItemdata->GetPos();
 
 	EPuzzleSkill SkillType = SkillItemdata->GetItemSkill();

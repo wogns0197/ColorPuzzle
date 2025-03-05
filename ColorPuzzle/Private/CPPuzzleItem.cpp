@@ -12,14 +12,6 @@
 void UCPPuzzleItem::NativeTick( const FGeometry& MyGeometry, float InDeltaTime )
 {
 	Super::NativeTick( MyGeometry, InDeltaTime );
-
-	if ( bMove )
-	{
-		bMove = false;
-
-		FVector2D CurPos = RenderTransform.Translation;
-		int a = 0;
-	}
 }
 
 void UCPPuzzleItem::NativeOnListItemObjectSet( UObject* ListItemObject )
@@ -70,7 +62,27 @@ FReply UCPPuzzleItem::NativeOnMouseMove( const FGeometry& InGeometry, const FPoi
 void UCPPuzzleItem::NativeOnMouseEnter( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent )
 {
 	Super::NativeOnMouseEnter( InGeometry, InMouseEvent );
+	if ( MouseEnterAnim && !bMove )
+	{
+		auto Mgr = ItemData->GetGameMgr();
+		if ( Mgr->IsDragging() )
+		{
+			PlayAnimation( DragStartAnim );
+		}
+		else
+		{
+			PlayAnimation( MouseEnterAnim );
+		}
+	}
 }
+
+void UCPPuzzleItem::NativeOnMouseLeave( const FPointerEvent& InMouseEvent )
+{
+	Super::NativeOnMouseLeave( InMouseEvent );
+	if ( MouseLeaveAnim && !bMove )
+		PlayAnimation( MouseLeaveAnim );
+}
+
 // ====================================== FOR NATIVE FUNC 
 #pragma endregion
 
@@ -125,6 +137,7 @@ void UCPPuzzleItem::OnFinishedMoveAnim()
 	SetRenderTransform( RenderTransform );
 	InvalidateLayoutAndVolatility();
 	SetStyle_Internal();
+	bMove = false;
 
 	if ( ItemData )
 	{
@@ -148,7 +161,10 @@ void UCPPuzzleItem::ShowDebugInfo( bool v )
 void UCPPuzzleItem::PlayMoveAnim()
 {
 	if ( MoveAnim )
+	{
 		PlayAnimation( MoveAnim );
+		bMove = true;
+	}
 }
 
 void UCPPuzzleItem::PlayRefreshAnim()
@@ -156,9 +172,7 @@ void UCPPuzzleItem::PlayRefreshAnim()
 	PlayAnimation( RefreshAnim );
 }
 
-void UCPPuzzleItem::NativeOnMouseLeave( const FPointerEvent& InMouseEvent )
+void UCPPuzzleItem::PlayDragFailAnim()
 {
-	Super::NativeOnMouseLeave( InMouseEvent );
-	UE_LOG( LogTemp, Log, TEXT("Leave %d, Delta(%f,%f)"), 
-		ItemData->GetColor(), InMouseEvent.GetCursorDelta().X, InMouseEvent.GetCursorDelta().Y);
+	PlayAnimation( DragFailAnim );
 }

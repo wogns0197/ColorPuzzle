@@ -57,6 +57,12 @@ void UCPPuzzleItemData::UpdateAnimToItemWidget()
 		EntryWidgetItem->UpdatePuzzleStyle();
 }
 
+void UCPPuzzleItemData::OnDragFailed()
+{
+	if ( EntryWidgetItem )
+		EntryWidgetItem->PlayDragFailAnim();
+}
+
 void UCPPuzzleItemData::OnToggleDebug( bool v )
 {
 	if ( EntryWidgetItem )

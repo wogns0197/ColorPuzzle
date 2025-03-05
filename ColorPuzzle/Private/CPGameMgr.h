@@ -10,6 +10,7 @@ struct FDragResult
 {
 	GENERATED_BODY()
 	// 아으~~~ 이럴거면 그냥 첨부터 pair, set 쓰지말자~~~
+	bool bValid;
 	FVector2D Delta;
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> TargetArr;
 
@@ -50,11 +51,13 @@ private:
 	FDragResult IsValidDrag( TObjectPtr<class UCPPuzzleItemData> InSecondItemData );
 	FDragResult UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill = EPuzzleSkill::Default );
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> CheckBetweenValid( bool bHorizontal, EPuzzleColor Color, int nAnchor, int nStartPos, int nEndPos );
+	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> GetDeltaPuzzles( bool bHorizontal, const FVector2D& startPos );
 
 public:
 	void OnInitFirstPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InFirstItemData );
 	void OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSecondItemData );
 	void MovePuzzle( int32 nIndex, bool bDown = true );
+	bool IsDragging() { return bDrag; }
 
 private:
 	EPuzzleColor GetColorByProb();

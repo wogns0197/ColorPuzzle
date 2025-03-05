@@ -33,6 +33,14 @@ public:
 	class UWidgetAnimation* TwinkleAnim;
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	class UWidgetAnimation* MoveAnim;
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	class UWidgetAnimation* MouseEnterAnim;
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	class UWidgetAnimation* MouseLeaveAnim;
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	class UWidgetAnimation* DragStartAnim;
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	class UWidgetAnimation* DragFailAnim;
 
 	UPROPERTY(EditAnywhere)
 	TMap<EPuzzleColor, FLinearColor> PuzzleColorMap;
@@ -44,17 +52,18 @@ private:
 public:
 	virtual void NativeTick( const FGeometry& MyGeometry, float InDeltaTime ) override;
 	virtual void NativeOnListItemObjectSet( UObject* ListItemObject ) override;
-	virtual void NativeOnMouseLeave( const FPointerEvent& InMouseEvent ) override;
 	virtual FReply NativeOnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent ) override;
 	virtual FReply NativeOnMouseButtonUp( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent ) override;
 	virtual FReply NativeOnMouseMove( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent ) override;
 	virtual void NativeOnMouseEnter( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent ) override;
+	virtual void NativeOnMouseLeave( const FPointerEvent& InMouseEvent ) override;
 
 public:
 	void UpdatePuzzleStyle();
 	void SetPuzzleStyle();
 	void ShowDebugInfo(bool v);
 	void PlayMoveAnim();
+	void PlayDragFailAnim();
 
 private:
 	void PlayRefreshAnim();

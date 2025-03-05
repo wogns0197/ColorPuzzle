@@ -45,6 +45,7 @@ public:
 	void InitFirstPuzzle();
 	void EndSecondPuzzle();
 	void UpdateAnimToItemWidget();
+	void OnDragFailed();
 
 	void OnToggleDebug( bool v ); // for debug
 	void OnProcessMove();
