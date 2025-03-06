@@ -64,15 +64,7 @@ void UCPPuzzleItem::NativeOnMouseEnter( const FGeometry& InGeometry, const FPoin
 	Super::NativeOnMouseEnter( InGeometry, InMouseEvent );
 	if ( MouseEnterAnim && !bMove )
 	{
-		auto Mgr = ItemData->GetGameMgr();
-		if ( Mgr->IsDragging() )
-		{
-			PlayAnimation( DragStartAnim );
-		}
-		else
-		{
-			PlayAnimation( MouseEnterAnim );
-		}
+		PlayAnimation( MouseEnterAnim );
 	}
 }
 

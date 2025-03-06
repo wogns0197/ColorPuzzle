@@ -119,10 +119,18 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 
 	if ( !DragResult.bValid )
 	{
-		const auto& DeltaPuzzles = GetDeltaPuzzles( DragResult.Delta.Y > 0 ? true : false, pFirstItemData->GetPos() );
-		for ( const auto& el : DeltaPuzzles )
+		if ( DragResult.Delta.X == -1 && DragResult.Delta.Y == -1 ) // 대각 드래그는 first와 second만 흔들도록함
 		{
-			el->OnDragFailed();
+			pFirstItemData->OnDragFailed();
+			InSecondItemData->OnDragFailed();
+		}
+		else
+		{
+			const auto& DeltaPuzzles = GetDeltaPuzzles( DragResult.Delta.Y > 0 ? true : false, pFirstItemData->GetPos(), InSecondItemData->GetPos() );
+			for ( const auto& el : DeltaPuzzles )
+			{
+				el->OnDragFailed();
+			}
 		}
 	}
 
@@ -157,7 +165,7 @@ FDragResult UCPGameMgr::IsValidDrag( TObjectPtr<UCPPuzzleItemData> InSecondItem 
 		const FVector2D& FirstPos = pFirstItemData->GetPos();
 		const FVector2D& SecondPos = InSecondItem->GetPos();
 
-		if ( FirstPos == SecondPos )
+		if ( ( FirstPos == SecondPos ) )
 		{
 			if ( IsTwinkeClass( pFirstItemData->GetColor() ) )
 			{
@@ -165,25 +173,30 @@ FDragResult UCPGameMgr::IsValidDrag( TObjectPtr<UCPPuzzleItemData> InSecondItem 
 			}
 		}
 
-		// 둘다 색이 다르고 둘다 반짝이클래스가 아닐 경우
-		else if ( pFirstItemData->GetColor() != InSecondItem->GetColor() && (!pFirstItemData->IsTwinkleItemData() && !InSecondItem->IsTwinkleItemData()) )
-		{ 
-			return Res; 
-		}
-
 		int32 x1 = FirstPos.X;
 		int32 y1 = FirstPos.Y;
 		int32 x2 = SecondPos.X;
 		int32 y2 = SecondPos.Y;
 
-		// 3개 이상으로 하려면 마우스 탈출 델타 값을 꼭 비교해야함. 그렇지 않으면 퍼즐 밖으로 마우스 조작 가능
-
 		int32 DragDelta = -1;
 		if ( (x2 - x1) != 0 && (y2 - y1) != 0 ) // 대각드래그
 		{
+			Res.Delta = FVector2D( -1, -1 );
 			return Res;
 		}
-		else if ( (x2 - x1) == 0 && (y2 - y1) != 0 ) // 가로드래그
+
+		if ( auto pTwinkle = IsAnyOfTwinkleClass( pFirstItemData.Get(), InSecondItem ) )
+		{
+			return UseSkill( pTwinkle );
+		}
+
+		// 둘다 색이 다르고 둘다 반짝이클래스가 아닐 경우
+		/*else if ( pFirstItemData->GetColor() != InSecondItem->GetColor() && (!pFirstItemData->IsTwinkleItemData() && !InSecondItem->IsTwinkleItemData()) )
+		{ 
+			return Res; 
+		}*/
+		
+		if ( (x2 - x1) == 0 && (y2 - y1) != 0 ) // 가로드래그
 		{
 			DragDelta = FMath::Abs( y2 - y1 );
 			if ( DragDelta < 5 ) // 첫 지점에서 최대 4칸 멀리까지 선택가능
@@ -253,23 +266,26 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::CheckBetweenValid( b
 	return arr;
 }
 
-TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::GetDeltaPuzzles( bool bHorizontal, const FVector2D& startPos )
+TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::GetDeltaPuzzles( bool bHorizontal, FVector2D startPos, FVector2D endPos )
 {
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> Res;
 
 	int32 startPivot = 0;
+	int32 endPivot = 0;
 	if ( bHorizontal )
 	{
-		startPivot = startPos.X * 5;
-		for ( int i = startPivot; i < startPivot + 5; i++ )
+		startPivot = FMath::Min( startPos.Y + ( startPos.X * 5 );
+		endPivot = endPos.Y + ( endPos.X * 5 );
+		for ( int i = startPivot; i < endPivot + 1; i++ )
 		{
 			Res.AddUnique( ItemDataArr[i] );
 		}
 	}
 	else
 	{
-		startPivot = startPos.Y;
-		for ( int i = startPivot; i < startPivot + 20 + 1; i += 5 )
+		startPivot = startPos.Y + ( startPos.X * 5 );
+		endPivot = endPos.Y + ( endPos.X * 5 );
+		for ( int i = startPivot; i < endPivot + 1; i += 5 )
 		{
 			Res.AddUnique( ItemDataArr[i] );
 		}
@@ -278,7 +294,14 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::GetDeltaPuzzles( boo
 	return Res;
 }
 
-FDragResult UCPGameMgr::UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill /*= EPuzzleSkill::Default*/ )
+TObjectPtr<UCPPuzzleItemData> UCPGameMgr::IsAnyOfTwinkleClass( TObjectPtr< UCPPuzzleItemData> pFirst, TObjectPtr< UCPPuzzleItemData> pSecond )
+{
+	if ( IsTwinkeClass( pFirst->GetColor() ) ) return pFirst;
+	if ( IsTwinkeClass( pSecond->GetColor() ) ) return pSecond;
+	return nullptr;
+}
+
+FDragResult UCPGameMgr::UseSkill( TObjectPtr< UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill /*= EPuzzleSkill::Default*/ )
 {
 	FDragResult Res;
 	Res.bValid = true;

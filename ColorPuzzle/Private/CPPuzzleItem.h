@@ -38,8 +38,6 @@ public:
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	class UWidgetAnimation* MouseLeaveAnim;
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
-	class UWidgetAnimation* DragStartAnim;
-	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	class UWidgetAnimation* DragFailAnim;
 
 	UPROPERTY(EditAnywhere)

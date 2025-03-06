@@ -51,7 +51,8 @@ private:
 	FDragResult IsValidDrag( TObjectPtr<class UCPPuzzleItemData> InSecondItemData );
 	FDragResult UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill = EPuzzleSkill::Default );
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> CheckBetweenValid( bool bHorizontal, EPuzzleColor Color, int nAnchor, int nStartPos, int nEndPos );
-	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> GetDeltaPuzzles( bool bHorizontal, const FVector2D& startPos );
+	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> GetDeltaPuzzles( bool bHorizontal, FVector2D startPos, FVector2D endPos );
+	TObjectPtr<class UCPPuzzleItemData> IsAnyOfTwinkleClass( TObjectPtr<class UCPPuzzleItemData> pFirst, TObjectPtr<class UCPPuzzleItemData> pSecond );
 
 public:
 	void OnInitFirstPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InFirstItemData );
