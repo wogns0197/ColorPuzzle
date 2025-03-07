@@ -16,6 +16,10 @@ public:
 	class UHorizontalBox* HorizontalBox_Score;
 	UPROPERTY(meta=(BindWidget))
 	class UCPScoreTextBlock* Default_ScoreDigit;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Image_Border;
+	UPROPERTY(meta=(BindWidget))
+	class UImage* Image_Background;
 
 private:
 	UPROPERTY()

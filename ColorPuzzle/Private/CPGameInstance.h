@@ -14,6 +14,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UObject> GameMgrClass;
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<UObject> ScoreMgrClass;
+
+	UPROPERTY(EditAnywhere)
 	class UDataTable* PuzzleProbData;
 	UPROPERTY(EditAnywhere)
 	int32 DefaultPuzzleCount;
@@ -21,6 +24,8 @@ public:
 private:
 	UPROPERTY()
 	class UCPGameMgr* GameMgr;
+	UPROPERTY()
+	class UCPScoreMgr* ScoreMgr;
 
 public:
 	void InitializeData( UUserWidget* pMainUI );

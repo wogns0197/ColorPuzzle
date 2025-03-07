@@ -29,17 +29,16 @@ private:
 	UPROPERTY()
 	TObjectPtr<class UCPMainUI> pMainUI;
 	UPROPERTY()
-	TObjectPtr<class UCPScoreBoard> pScoreBoard;
-	UPROPERTY()
 	TArray<TObjectPtr<class UCPPuzzleItemData>> ItemDataArr;
 
 private:
 	TMap<float, EPuzzleColor> Weights;
-	int32 Score;
+	UPROPERTY()
+	TObjectPtr<class UCPScoreMgr> ScoreMgr;
 
 public:
 	bool bDebugView = false; // for debug
-	void InitializeData( UUserWidget* _pMainUI, int32 nDefaultPuzzleCount, UObject* InPuzzleProbData );
+	void InitializeData( UUserWidget* _pMainUI, TObjectPtr<class UCPScoreMgr> _pScoreMgr,int32 nDefaultPuzzleCount, UObject* InPuzzleProbData );
 	UCPMainUI* GetMainUI() { return pMainUI; }
 
 // UI 컨트롤

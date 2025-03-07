@@ -6,14 +6,17 @@
 #include "Engine/DataTable.h"
 #include "CPMainUI.h"
 #include "CPScoreBoard.h"
+#include "CPScoreMgr.h"
 
-void UCPGameMgr::InitializeData( UUserWidget* _pMainUI, int32 nDefaultPuzzleCount, UObject* InPuzzleProbData )
+void UCPGameMgr::InitializeData( UUserWidget* _pMainUI, TObjectPtr<UCPScoreMgr> _pScoreMgr,int32 nDefaultPuzzleCount, UObject* InPuzzleProbData )
 {
 	if ( _pMainUI ) {
 		pMainUI = Cast<UCPMainUI>( _pMainUI );
 		pMainUI->SetGameMgr( this );
-		pScoreBoard = pMainUI->GetScoreBoardUI();
 	}
+
+	if ( _pScoreMgr )
+		ScoreMgr = _pScoreMgr;
 
 	TArray<FPuzzleProbData*> PuzzleProbDataTable;
 	UDataTable* DT_PuzzleProb = Cast<UDataTable>( InPuzzleProbData );
@@ -42,7 +45,6 @@ void UCPGameMgr::InitializeData( UUserWidget* _pMainUI, int32 nDefaultPuzzleCoun
 	}
 
 	pMainUI->SetTileViewData( ItemDataArr );
-	Score = 0;
 }
 
 EPuzzleColor UCPGameMgr::GetColorByProb()
@@ -110,10 +112,11 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 			UpdateDataAndWidget( el.Get() );
 		}
 
-		if ( pScoreBoard )
+		if ( ScoreMgr )
 		{
-			Score += DragResult.TargetArr.Num();
-			pScoreBoard->SetScore( Score );
+			ScoreMgr->CalcScore( DragResult.TargetArr );
+			/*Score += DragResult.TargetArr.Num();
+			pScoreBoard->SetScore( Score );*/
 		}
 	}
 
@@ -270,25 +273,11 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::GetDeltaPuzzles( boo
 {
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> Res;
 
-	int32 startPivot = 0;
-	int32 endPivot = 0;
-	if ( bHorizontal )
+	int32 startPivot = FMath::Min( startPos.Y + ( startPos.X * 5 ), endPos.Y + ( endPos.X * 5 ) );
+	int32 endPivot = FMath::Max( startPos.Y + ( startPos.X * 5 ), endPos.Y + ( endPos.X * 5 ) );
+	for ( int i = startPivot; i < endPivot + 1; bHorizontal ? i++ : i += 5 )
 	{
-		startPivot = FMath::Min( startPos.Y + ( startPos.X * 5 );
-		endPivot = endPos.Y + ( endPos.X * 5 );
-		for ( int i = startPivot; i < endPivot + 1; i++ )
-		{
 			Res.AddUnique( ItemDataArr[i] );
-		}
-	}
-	else
-	{
-		startPivot = startPos.Y + ( startPos.X * 5 );
-		endPivot = endPos.Y + ( endPos.X * 5 );
-		for ( int i = startPivot; i < endPivot + 1; i += 5 )
-		{
-			Res.AddUnique( ItemDataArr[i] );
-		}
 	}
 
 	return Res;
