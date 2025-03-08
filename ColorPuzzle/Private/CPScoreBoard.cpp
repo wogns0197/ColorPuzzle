@@ -53,16 +53,21 @@ void UCPScoreBoard::SetScore( int32 Num )
 	{
 		TextArr[i]->SetDigit( Digits[TextArr.Num() - i - 1] );
 	}
+
+	OnScoreAccumuluated();
 }
 
 void UCPScoreBoard::SetBackgroundColor( const FLinearColor& InColor )
 {
-	if ( ChangeColorAnim )
-		PlayAnimation( ChangeColorAnim );
-
 	if ( Image_Border && Image_Background )
 	{
 		Image_Border->SetColorAndOpacity( InColor );
 		Image_Background->SetColorAndOpacity( InColor );
 	}
+}
+
+void UCPScoreBoard::OnScoreAccumuluated()
+{
+	if ( ChangeColorAnim )
+		PlayAnimation( ChangeColorAnim );
 }

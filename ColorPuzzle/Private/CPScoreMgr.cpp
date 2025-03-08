@@ -13,15 +13,22 @@ void UCPScoreMgr::InitializeData( TObjectPtr<UCPScoreBoard> pInScoreBoard, const
 
 void UCPScoreMgr::CalcScore( const TArray<TWeakObjectPtr<class UCPPuzzleItemData>> CalcArr )
 {
+	EPuzzleColor SettingColor = EPuzzleColor::NONE;
 	for ( const auto& el : CalcArr )
 	{
 		if ( IsTwinkeColor( el->GetColor() ) ) {
+			SettingColor = EPuzzleColor::NONE;
 			break;
 		}
 		else {
-			SetScoreBoardColor( PuzzleColorMap[el->GetColor()] );
-			break;
+			SettingColor = el->GetColor();
 		}
+	}
+
+	if ( SettingColor != EPuzzleColor::NONE )
+	{
+		SetScoreBoardColor( PuzzleColorMap[SettingColor] );
+		PreScoredColor = SettingColor;
 	}
 
 

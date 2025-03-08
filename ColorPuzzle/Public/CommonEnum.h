@@ -46,6 +46,26 @@ enum class EPuzzleSkill : int32
 	COUNT,
 };
 
+UENUM()
+enum class EComboType : int32
+{
+	NONE = -1,
+
+	SameColor,
+	Triple,
+	Quad,
+	Penta,
+	SkillInARow,
+	Fever,
+};
+
+UENUM()
+enum class EModeType : int32
+{
+	Default,
+	Fever,
+};
+
 static bool IsTwinkeColor( EPuzzleColor c )
 {
 	switch ( c )

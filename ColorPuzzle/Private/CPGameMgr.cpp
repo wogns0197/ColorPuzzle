@@ -62,7 +62,7 @@ EPuzzleColor UCPGameMgr::GetColorByProb()
 
 	// for debug
 	if ( bDebugView ) {
-		TArray<EPuzzleColor> DebugColorArr = { EPuzzleColor::Gold, EPuzzleColor::Diamond };
+		TArray<EPuzzleColor> DebugColorArr = { EPuzzleColor::Silver, EPuzzleColor::Silver };
 		_color = DebugColorArr[FMath::RandRange( 0, 1 )];
 	}
 
