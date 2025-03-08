@@ -23,9 +23,10 @@ public:
 
 private:
 	UPROPERTY()
-	class UCPGameMgr* GameMgr;
-	UPROPERTY()
 	class UCPScoreMgr* ScoreMgr;
+
+	UPROPERTY()
+	class UCPGameMgr* GameMgr;
 
 public:
 	void InitializeData( UUserWidget* pMainUI );

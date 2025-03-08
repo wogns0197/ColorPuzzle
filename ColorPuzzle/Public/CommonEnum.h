@@ -15,6 +15,7 @@ struct FPuzzleData
 UENUM()
 enum class EPuzzleColor : int32
 {
+	NONE = -1,
 	R,
 	G,
 	B,
@@ -45,7 +46,7 @@ enum class EPuzzleSkill : int32
 	COUNT,
 };
 
-static bool IsTwinkeClass( EPuzzleColor c )
+static bool IsTwinkeColor( EPuzzleColor c )
 {
 	switch ( c )
 	{

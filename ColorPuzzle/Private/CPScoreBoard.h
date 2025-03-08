@@ -21,6 +21,9 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UImage* Image_Background;
 
+	UPROPERTY( meta = (BindWidgetAnim), Transient )
+	class UWidgetAnimation* ChangeColorAnim;
+
 private:
 	UPROPERTY()
 	TArray<class UCPScoreTextBlock*> TextArr;
@@ -29,5 +32,6 @@ private:
 
 public:
 	virtual bool Initialize() override;
-	void SetScore( int32 Num );
+	void SetScore( int32 Num ); // 이 함수에 색 지정까지 일부러 포함안시킴 : 나중에 분리가 필요해질 때를 고려함
+	void SetBackgroundColor( const FLinearColor& InColor );
 };

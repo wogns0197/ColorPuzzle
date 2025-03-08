@@ -1,5 +1,6 @@
 #include "CPScoreBoard.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Image.h"
 #include "CPScoreTextBlock.h"
 
 bool UCPScoreBoard::Initialize()
@@ -51,5 +52,17 @@ void UCPScoreBoard::SetScore( int32 Num )
 	for ( int i = 0; i < TextArr.Num(); i++ )
 	{
 		TextArr[i]->SetDigit( Digits[TextArr.Num() - i - 1] );
+	}
+}
+
+void UCPScoreBoard::SetBackgroundColor( const FLinearColor& InColor )
+{
+	if ( ChangeColorAnim )
+		PlayAnimation( ChangeColorAnim );
+
+	if ( Image_Border && Image_Background )
+	{
+		Image_Border->SetColorAndOpacity( InColor );
+		Image_Background->SetColorAndOpacity( InColor );
 	}
 }

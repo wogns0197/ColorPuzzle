@@ -108,15 +108,16 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 			TargetItemData->UpdateAnimToItemWidget();
 		};
 
-		for ( const auto& el : DragResult.TargetArr ) {
-			UpdateDataAndWidget( el.Get() );
-		}
-
 		if ( ScoreMgr )
 		{
 			ScoreMgr->CalcScore( DragResult.TargetArr );
 			/*Score += DragResult.TargetArr.Num();
 			pScoreBoard->SetScore( Score );*/
+		}
+
+		// !!!! 이 업데이트 구문은 무조건 마지막에 해야함 !!!!
+		for ( const auto& el : DragResult.TargetArr ) {
+			UpdateDataAndWidget( el.Get() );
 		}
 	}
 
@@ -170,7 +171,7 @@ FDragResult UCPGameMgr::IsValidDrag( TObjectPtr<UCPPuzzleItemData> InSecondItem 
 
 		if ( ( FirstPos == SecondPos ) )
 		{
-			if ( IsTwinkeClass( pFirstItemData->GetColor() ) )
+			if ( IsTwinkeColor( pFirstItemData->GetColor() ) )
 			{
 				return UseSkill( pFirstItemData.Get() );
 			}
@@ -239,7 +240,7 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::CheckBetweenValid( b
 		for ( int i = CheckStartPoint; i < CheckStartPoint + (nEndPos - nStartPos) + 1; ++i )
 		{
 			EPuzzleColor TargetColor = ItemDataArr[i]->GetColor();
-			if ( ItemDataArr[i]->GetColor() != Color && !IsTwinkeClass(TargetColor) ) // 반짝이 클래스는 포함시켜준다
+			if ( ItemDataArr[i]->GetColor() != Color && !IsTwinkeColor(TargetColor) ) // 반짝이 클래스는 포함시켜준다
 			{
 				arr.Empty(); // 버그 다 죽어라!
 				break;
@@ -255,7 +256,7 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::CheckBetweenValid( b
 		for ( int i = CheckStartPoint; i < CheckStartPoint + ((nEndPos - nStartPos) * 5) + 1; i += 5 )
 		{
 			EPuzzleColor TargetColor = ItemDataArr[i]->GetColor();
-			if ( ItemDataArr[i]->GetColor() != Color && !IsTwinkeClass(TargetColor) ) // 반짝이 클래스는 포함시켜준다
+			if ( ItemDataArr[i]->GetColor() != Color && !IsTwinkeColor(TargetColor) ) // 반짝이 클래스는 포함시켜준다
 			{
 				arr.Empty(); // 버그 다 죽어라!
 				break;
@@ -285,8 +286,8 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::GetDeltaPuzzles( boo
 
 TObjectPtr<UCPPuzzleItemData> UCPGameMgr::IsAnyOfTwinkleClass( TObjectPtr< UCPPuzzleItemData> pFirst, TObjectPtr< UCPPuzzleItemData> pSecond )
 {
-	if ( IsTwinkeClass( pFirst->GetColor() ) ) return pFirst;
-	if ( IsTwinkeClass( pSecond->GetColor() ) ) return pSecond;
+	if ( IsTwinkeColor( pFirst->GetColor() ) ) return pFirst;
+	if ( IsTwinkeColor( pSecond->GetColor() ) ) return pSecond;
 	return nullptr;
 }
 
@@ -339,6 +340,17 @@ FDragResult UCPGameMgr::UseSkill( TObjectPtr< UCPPuzzleItemData> SkillItemdata, 
 	default:
 		break;
 	}
+
+	// 일단 아래 기능 보류함 재귀로하면 구조를 변경하지 않는 이상 스택오버가 분명 날 것 같음. 최소한 중복 제거는 막아야함
+	// 스킬로 스킬퍼즐 파괴 시 재귀
+	/*for ( const auto& el : Res.TargetArr )
+	{
+		if ( IsTwinkeColor( el->GetColor() ) )
+		{
+			TSet<TWeakObjectPtr<class UCPPuzzleItemData>> UniqueSet( Res.TargetArr );
+			UniqueSet.Append( UseSkill( el.Get(), el->GetItemSkill()).TargetArr );
+		}
+	}*/
 
 	return Res;
 }

@@ -4,6 +4,8 @@
 #include "UObject/NoExportTypes.h"
 #include "CPScoreMgr.generated.h"
 
+enum class EPuzzleColor;
+
 UCLASS()
 class UCPScoreMgr : public UObject
 {
@@ -17,8 +19,14 @@ private:
 	UPROPERTY()
 	int32 Score;
 
+	EPuzzleColor PreScoredColor;
+	TMap<EPuzzleColor, FLinearColor> PuzzleColorMap;
+
 public:
-	void InitializeData( TObjectPtr<class UCPScoreBoard> pInScoreBoard );
+	void InitializeData( TObjectPtr<class UCPScoreBoard> pInScoreBoard, const TMap<EPuzzleColor, FLinearColor>& InColorMap );
 	void CalcScore( const TArray<TWeakObjectPtr<class UCPPuzzleItemData>> CalcArr );
 
+private:
+	void SetScoreBoardColor( const FLinearColor& InColor );
+	void CheckValidCombo();
 };

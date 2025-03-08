@@ -20,7 +20,7 @@ struct FDragResult
 	}
 };
 
-UCLASS()
+UCLASS(Blueprintable)
 class UCPGameMgr : public UObject
 {
 	GENERATED_BODY()
@@ -30,6 +30,8 @@ private:
 	TObjectPtr<class UCPMainUI> pMainUI;
 	UPROPERTY()
 	TArray<TObjectPtr<class UCPPuzzleItemData>> ItemDataArr;
+	UPROPERTY(EditAnywhere)
+	TMap<EPuzzleColor, FLinearColor> PuzzleColorMap;
 
 private:
 	TMap<float, EPuzzleColor> Weights;
@@ -58,6 +60,7 @@ public:
 	void OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSecondItemData );
 	void MovePuzzle( int32 nIndex, bool bDown = true );
 	bool IsDragging() { return bDrag; }
+	const TMap<EPuzzleColor, FLinearColor>& GetPuzzleColorMap() { return PuzzleColorMap; }
 
 private:
 	EPuzzleColor GetColorByProb();

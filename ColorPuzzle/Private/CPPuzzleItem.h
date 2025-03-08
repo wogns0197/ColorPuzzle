@@ -40,10 +40,8 @@ public:
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	class UWidgetAnimation* DragFailAnim;
 
-	UPROPERTY(EditAnywhere)
-	TMap<EPuzzleColor, FLinearColor> PuzzleColorMap;
-
 private:
+	TMap<EPuzzleColor, FLinearColor> PuzzleColorMap;
 	FTimerHandle ColorChangeTimerHandle;
 	bool bMove;
 

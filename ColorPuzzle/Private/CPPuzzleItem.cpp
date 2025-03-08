@@ -18,6 +18,7 @@ void UCPPuzzleItem::NativeOnListItemObjectSet( UObject* ListItemObject )
 {
 	if ( ItemData = Cast<UCPPuzzleItemData>( ListItemObject ) )
 	{
+		PuzzleColorMap = ItemData->GetGameMgr()->GetPuzzleColorMap();
 		SetStyle_Internal();
 		ItemData->SetTileItem( this );
 		ColorChangeTimerHandle.Invalidate();
@@ -107,7 +108,7 @@ void UCPPuzzleItem::SetStyle_Internal()
 		Image_Border->SetColorAndOpacity( SettingColor );
 
 		StopAnimation( TwinkleAnim );
-		if ( IsTwinkeClass( ColorType ) ) {
+		if ( IsTwinkeColor( ColorType ) ) {
 			PlayAnimation( TwinkleAnim, 0.f, 0 );
 		}
 	}

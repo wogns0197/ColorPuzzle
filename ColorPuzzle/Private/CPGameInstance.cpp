@@ -9,7 +9,7 @@ void UCPGameInstance::Init()
 
 	if ( GameMgrClass )
 	{
-		GameMgr = NewObject<UCPGameMgr>( this );
+		GameMgr = NewObject<UCPGameMgr>( this, GameMgrClass );
 	}
 
 	if ( ScoreMgrClass )
@@ -21,13 +21,13 @@ void UCPGameInstance::Init()
 
 void UCPGameInstance::InitializeData( UUserWidget* pMainUI )
 {
-	if ( pMainUI && ScoreMgr )
-	{
-		if ( UCPMainUI* pUI = Cast<UCPMainUI>( pMainUI ) ) {
-			ScoreMgr->InitializeData( pUI->GetScoreBoardUI() );
-		}
-	}
-
 	if ( pMainUI && GameMgr )
 		GameMgr->InitializeData( pMainUI, ScoreMgr, DefaultPuzzleCount, PuzzleProbData );
+
+	if ( pMainUI && ScoreMgr )
+{
+	if ( UCPMainUI* pUI = Cast<UCPMainUI>( pMainUI ) ) {
+		ScoreMgr->InitializeData( pUI->GetScoreBoardUI(), GameMgr->GetPuzzleColorMap() );
+	}
+}
 }
