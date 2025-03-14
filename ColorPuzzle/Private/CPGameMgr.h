@@ -47,13 +47,20 @@ public:
 private:
 	bool bDrag = false;
 	TWeakObjectPtr<class UCPPuzzleItemData> pFirstItemData;
+	TWeakObjectPtr<class UCPPuzzleItemData> pSecondItemData;
+	TArray<TObjectPtr<class UCPPuzzleItemData>> TwoClickPuzzleArr;
 
 private:
-	FDragResult IsValidDrag( TObjectPtr<class UCPPuzzleItemData> InSecondItemData );
+	FDragResult IsValidDrag();
 	FDragResult UseSkill( TObjectPtr<class UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill = EPuzzleSkill::Default );
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> CheckBetweenValid( bool bHorizontal, EPuzzleColor Color, int nAnchor, int nStartPos, int nEndPos );
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> GetDeltaPuzzles( bool bHorizontal, FVector2D startPos, FVector2D endPos );
 	TObjectPtr<class UCPPuzzleItemData> IsAnyOfTwinkleClass( TObjectPtr<class UCPPuzzleItemData> pFirst, TObjectPtr<class UCPPuzzleItemData> pSecond );
+	void DoMerge( const FDragResult& Res );
+
+	void RegisterClickedPuzzleProc( TObjectPtr<class UCPPuzzleItemData> InPuzzle );
+	void IsValidClick();
+	void ResetWeakPuzzlePtr();
 
 public:
 	void OnInitFirstPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InFirstItemData );

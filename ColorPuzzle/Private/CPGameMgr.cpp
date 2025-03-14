@@ -93,13 +93,32 @@ void UCPGameMgr::OnInitFirstPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InFi
 void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSecondItemData )
 {
 	bDrag = false;
-	if ( !pFirstItemData.IsValid() || !InSecondItemData.IsValid() ) return;
 
-	const auto& DragResult = IsValidDrag( InSecondItemData.Get() );
-	
-	if ( DragResult.bValid && DragResult.TargetArr.Num() > 0 )
+	pSecondItemData = InSecondItemData;
+	if ( !pFirstItemData.IsValid() || !pSecondItemData.IsValid() ) return;
+
+	FDragResult Result;
+
+	if ( pFirstItemData == pSecondItemData )
 	{
-		UE_LOG( LogTemp, Warning, TEXT( "O : Delta(%f,%f)"), DragResult.Delta.X, DragResult.Delta.Y );
+		if ( IsTwinkeColor( pFirstItemData->GetColor() ) )
+		{
+			Result = UseSkill( pFirstItemData.Get() );
+		}
+
+		else // 지훈이 아이디어로 클릭 to 클릭 체크 추가
+			return RegisterClickedPuzzleProc( InSecondItemData.Get() );
+	}
+
+	Result = IsValidDrag();
+	DoMerge( Result );
+}
+
+void UCPGameMgr::DoMerge( const FDragResult& Res )
+{
+	if ( Res.bValid && Res.TargetArr.Num() > 0 )
+	{
+		UE_LOG( LogTemp, Warning, TEXT( "O : Delta(%f,%f)"), Res.Delta.X, Res.Delta.Y );
 		
 		auto UpdateDataAndWidget = [=]( UCPPuzzleItemData* TargetItemData ) {
 			const EPuzzleColor SettingColor = GetColorByProb();
@@ -110,27 +129,27 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 
 		if ( ScoreMgr )
 		{
-			ScoreMgr->CalcScore( DragResult.TargetArr );
+			ScoreMgr->CalcScore( Res.TargetArr );
 			/*Score += DragResult.TargetArr.Num();
 			pScoreBoard->SetScore( Score );*/
 		}
 
 		// !!!! 이 업데이트 구문은 무조건 마지막에 해야함 !!!!
-		for ( const auto& el : DragResult.TargetArr ) {
+		for ( const auto& el : Res.TargetArr ) {
 			UpdateDataAndWidget( el.Get() );
 		}
 	}
 
-	if ( !DragResult.bValid )
+	if ( !Res.bValid )
 	{
-		if ( DragResult.Delta.X == -1 && DragResult.Delta.Y == -1 ) // 대각 드래그는 first와 second만 흔들도록함
+		if ( Res.Delta.X == -1 && Res.Delta.Y == -1 ) // 대각 드래그는 first와 second만 흔들도록함
 		{
 			pFirstItemData->OnDragFailed();
-			InSecondItemData->OnDragFailed();
+			pSecondItemData->OnDragFailed();
 		}
 		else
 		{
-			const auto& DeltaPuzzles = GetDeltaPuzzles( DragResult.Delta.Y > 0 ? true : false, pFirstItemData->GetPos(), InSecondItemData->GetPos() );
+			const auto& DeltaPuzzles = GetDeltaPuzzles( Res.Delta.Y > 0 ? true : false, pFirstItemData->GetPos(), pSecondItemData->GetPos() );
 			for ( const auto& el : DeltaPuzzles )
 			{
 				el->OnDragFailed();
@@ -138,11 +157,14 @@ void UCPGameMgr::OnEndSecondPuzzle( TWeakObjectPtr<class UCPPuzzleItemData> InSe
 		}
 	}
 
-	pFirstItemData.Reset();
+	ResetWeakPuzzlePtr();
 }
 
 void UCPGameMgr::MovePuzzle( int32 nIndex, bool bDown )
 {
+	ResetWeakPuzzlePtr();
+	TwoClickPuzzleArr.Empty();
+
 	FPuzzleData PreData = ItemDataArr[nIndex + 20]->GetData();
 	for ( int i = nIndex; i < 25; i += 5 )
 	{
@@ -160,22 +182,25 @@ void UCPGameMgr::MovePuzzle( int32 nIndex, bool bDown )
 // ================================================================================================================================
 // ================================================================================================================================
 
-FDragResult UCPGameMgr::IsValidDrag( TObjectPtr<UCPPuzzleItemData> InSecondItem )
+FDragResult UCPGameMgr::IsValidDrag()
 {
 	FDragResult Res;
 	Res.bValid = false;
-	if ( pFirstItemData.IsValid() && InSecondItem )
+	if ( pFirstItemData.IsValid() && pSecondItemData.IsValid() )
 	{
 		const FVector2D& FirstPos = pFirstItemData->GetPos();
-		const FVector2D& SecondPos = InSecondItem->GetPos();
+		const FVector2D& SecondPos = pSecondItemData->GetPos();
 
-		if ( ( FirstPos == SecondPos ) )
-		{
-			if ( IsTwinkeColor( pFirstItemData->GetColor() ) )
-			{
-				return UseSkill( pFirstItemData.Get() );
-			}
-		}
+		//if ( ( FirstPos == SecondPos ) )
+		//{
+		//	if ( IsTwinkeColor( pFirstItemData->GetColor() ) )
+		//	{
+		//		return UseSkill( pFirstItemData.Get() );
+		//	}
+
+		//	else // 지훈이 아이디어로 클릭 to 클릭 체크 추가
+		//		return IsValidClick( pFirstItemData.Get(), pSecondItemData );
+		//}
 
 		int32 x1 = FirstPos.X;
 		int32 y1 = FirstPos.Y;
@@ -189,7 +214,7 @@ FDragResult UCPGameMgr::IsValidDrag( TObjectPtr<UCPPuzzleItemData> InSecondItem 
 			return Res;
 		}
 
-		if ( auto pTwinkle = IsAnyOfTwinkleClass( pFirstItemData.Get(), InSecondItem ) )
+		if ( auto pTwinkle = IsAnyOfTwinkleClass( pFirstItemData.Get(), pSecondItemData.Get() ) )
 		{
 			return UseSkill( pTwinkle );
 		}
@@ -270,6 +295,12 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::CheckBetweenValid( b
 	return arr;
 }
 
+void UCPGameMgr::IsValidClick()
+{
+	const auto& Result = IsValidDrag();
+	DoMerge( Result );
+}
+
 TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::GetDeltaPuzzles( bool bHorizontal, FVector2D startPos, FVector2D endPos )
 {
 	TArray<TWeakObjectPtr<class UCPPuzzleItemData>> Res;
@@ -284,14 +315,14 @@ TArray<TWeakObjectPtr<class UCPPuzzleItemData>> UCPGameMgr::GetDeltaPuzzles( boo
 	return Res;
 }
 
-TObjectPtr<UCPPuzzleItemData> UCPGameMgr::IsAnyOfTwinkleClass( TObjectPtr< UCPPuzzleItemData> pFirst, TObjectPtr< UCPPuzzleItemData> pSecond )
+TObjectPtr<UCPPuzzleItemData> UCPGameMgr::IsAnyOfTwinkleClass( TObjectPtr<UCPPuzzleItemData> pFirst, TObjectPtr<UCPPuzzleItemData> pSecond )
 {
 	if ( IsTwinkeColor( pFirst->GetColor() ) ) return pFirst;
 	if ( IsTwinkeColor( pSecond->GetColor() ) ) return pSecond;
 	return nullptr;
 }
 
-FDragResult UCPGameMgr::UseSkill( TObjectPtr< UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill /*= EPuzzleSkill::Default*/ )
+FDragResult UCPGameMgr::UseSkill( TObjectPtr<UCPPuzzleItemData> SkillItemdata, EPuzzleSkill InSkill /*= EPuzzleSkill::Default*/ )
 {
 	FDragResult Res;
 	Res.bValid = true;
@@ -353,4 +384,25 @@ FDragResult UCPGameMgr::UseSkill( TObjectPtr< UCPPuzzleItemData> SkillItemdata, 
 	}*/
 
 	return Res;
+}
+
+void UCPGameMgr::RegisterClickedPuzzleProc( TObjectPtr<UCPPuzzleItemData> InPuzzle )
+{
+	if ( TwoClickPuzzleArr.Num() < 2 )
+		TwoClickPuzzleArr.Emplace( InPuzzle );
+
+	if ( TwoClickPuzzleArr.Num() == 2 )
+	{
+		pFirstItemData = TwoClickPuzzleArr.Pop();
+		pSecondItemData = TwoClickPuzzleArr.Pop();
+		IsValidClick();
+	}
+
+	ResetWeakPuzzlePtr();
+}
+
+void UCPGameMgr::ResetWeakPuzzlePtr()
+{
+	pFirstItemData.Reset();
+	pSecondItemData.Reset();
 }
